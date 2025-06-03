@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# ====== Exit on error ======
+set -e
+
+# ====== Configurable Variables ======
+STACK_NAME="NetBootVPC"
+TEMPLATE_FILE="template.yaml"
+REGION="ap-southeast-2"
+
+VPC_CIDR="10.200.123.0/24"
+PUBLIC_SUBNET_CIDR="10.200.123.0/25"
+PRIVATE_SUBNET_CIDR="10.200.123.128/25"
+AVAILABILITY_ZONE="ap-southeast-2a"
+
+# ====== Deploy the Stack ======
+echo "Deploying CloudFormation stack: $STACK_NAME in region $REGION"
+
+# https://awscli.amazonaws.com/v2/documentation/api/latest/reference/cloudformation/deploy/index.html
+aws cloudformation deploy \
+  --stack-name "$STACK_NAME" \
+  --template-file "$TEMPLATE_FILE" \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --region "$REGION" \
+  --parameter-overrides \
+    VPCCidr=$VPC_CIDR \
+    PublicSubnetCidr=$PUBLIC_SUBNET_CIDR \
+    PrivateSubnetCidr=$PRIVATE_SUBNET_CIDR \
+    AvailabilityZone=$AVAILABILITY_ZONE
+
+# ====== Check Status ======
+echo "Waiting for stack creation to complete..."
+aws cloudformation wait stack-create-complete \
+  --stack-name "$STACK_NAME" \
+  --region "$REGION"
+echo "Stack $STACK_NAME deployed successfully."
+
+# ====== Display Outputs ======
+aws cloudformation describe-stacks \
+  --stack-name "$STACK_NAME" \
+  --region "$REGION" \
+  --query 'Stacks[0].Outputs' \
+  --output table \
+
