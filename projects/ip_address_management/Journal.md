@@ -175,4 +175,4 @@ az deployment group create \
 ```
 
 This successfully deployed. Here is an image of me RDPing into the VM:
-~[](assets/windows_server.png)
+![](assets/windows_server.png)
